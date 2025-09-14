@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Download, Zap, ZoomIn, ZoomOut } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox.jsx'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select.jsx'
 import { HexColorPicker, HexColorInput } from 'react-colorful'
 import { Slider } from '@/components/ui/slider.jsx'
 import './App.css'
@@ -14,21 +14,27 @@ function App() {
   const [tamilText, setTamilText] = useState('புதுச்சேரி')
   const [width, setWidth] = useState(64)
   const [height, setHeight] = useState(16)
-  const [isBold, setIsBold] = useState(false)
-  const [selectedFont, setSelectedFont] = useState('Tamil Sangam MN') // Default to Tamil Sangam MN
+  const [isBold, setIsBold] = useState(true) // Default to bold for better readability
+  const [selectedFont, setSelectedFont] = useState('Meera Inimai') // Default to Meera Inimai
   const [selectedColor, setSelectedColor] = useState('#FFFFFF')
   const [customFontSize, setCustomFontSize] = useState(0) // 0 means auto-size
-  const [fontWeight, setFontWeight] = useState('normal') // normal, bold, 100-900
+  const [fontWeight, setFontWeight] = useState('bold') // Default to bold
   const [generatedImage, setGeneratedImage] = useState(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [previewZoom, setPreviewZoom] = useState(2) // Default zoom level
+  const [previewZoom, setPreviewZoom] = useState(4) // Increased default zoom level
   const canvasRef = useRef(null)
 
-  const fonts = [
+  const recommendedFonts = [
+    'Meera Inimai',
+    'Noto Sans Tamil',
+    'Tiro Tamil',
+    'Anek Tamil',
     'Tamil Sangam MN',
+    'Brahma'
+  ]
+
+  const otherFonts = [
     'Tamil MN',
-    'Brahma',
-    'Noto Sans Tamil UI',
     'Latha',
     'Shruti',
     'Mukta Malar',
@@ -165,11 +171,22 @@ function App() {
                     <SelectValue placeholder="Select a font" />
                   </SelectTrigger>
                   <SelectContent>
-                    {fonts.map((font) => (
-                      <SelectItem key={font} value={font}>
-                        {font}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectLabel>Recommended for LED</SelectLabel>
+                      {recommendedFonts.map((font) => (
+                        <SelectItem key={font} value={font}>
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Other Tamil Fonts</SelectLabel>
+                      {otherFonts.map((font) => (
+                        <SelectItem key={font} value={font}>
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
