@@ -15,7 +15,7 @@ function App() {
   const [width, setWidth] = useState(64)
   const [height, setHeight] = useState(16)
   const [isBold, setIsBold] = useState(false)
-  const [selectedFont, setSelectedFont] = useState('Noto Sans Tamil UI')
+  const [selectedFont, setSelectedFont] = useState('Tamil Sangam MN') // Default to Tamil Sangam MN
   const [selectedColor, setSelectedColor] = useState('#FFFFFF')
   const [customFontSize, setCustomFontSize] = useState(0) // 0 means auto-size
   const [fontWeight, setFontWeight] = useState('normal') // normal, bold, 100-900
@@ -25,17 +25,21 @@ function App() {
   const canvasRef = useRef(null)
 
   const fonts = [
-    'Noto Sans Tamil UI',
-    'Brahma',
-    'Tamil MN',
     'Tamil Sangam MN',
+    'Tamil MN',
+    'Brahma',
+    'Noto Sans Tamil UI',
     'Latha',
     'Shruti',
     'Mukta Malar',
     'Hind Madurai',
     'Aabohi',
     'Aduscript',
-    'AnjaliOldLipi'
+    'AnjaliOldLipi',
+    'Ezhil',
+    'Kavivanar',
+    'Solaimalai',
+    'Sundar'
   ]
 
   const fontWeights = [
