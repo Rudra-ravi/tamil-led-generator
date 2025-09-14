@@ -24,28 +24,33 @@ function App() {
   const [previewZoom, setPreviewZoom] = useState(4) // Increased default zoom level
   const canvasRef = useRef(null)
 
-  const recommendedFonts = [
+  const tamilFonts = [
     'Meera Inimai',
     'Noto Sans Tamil',
     'Tiro Tamil',
     'Anek Tamil',
     'Tamil Sangam MN',
-    'Brahma'
-  ]
-
-  const otherFonts = [
-    'Tamil MN',
-    'Latha',
-    'Shruti',
-    'Mukta Malar',
-    'Hind Madurai',
-    'Aabohi',
-    'Aduscript',
-    'AnjaliOldLipi',
+    'Brahma',
     'Ezhil',
     'Kavivanar',
     'Solaimalai',
     'Sundar'
+  ]
+
+  const bestEnglishFonts = [
+    'Arial',
+    'Verdana',
+    'Helvetica',
+    'Roboto',
+    'Open Sans'
+  ]
+
+  const stylishFonts = [
+    'Impact',
+    'Georgia',
+    'Courier New',
+    'Brush Script MT',
+    'Lucida Handwriting'
   ]
 
   const fontWeights = [
@@ -172,16 +177,24 @@ function App() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Recommended for LED</SelectLabel>
-                      {recommendedFonts.map((font) => (
+                      <SelectLabel>Tamil Fonts</SelectLabel>
+                      {tamilFonts.map((font) => (
                         <SelectItem key={font} value={font}>
                           {font}
                         </SelectItem>
                       ))}
                     </SelectGroup>
                     <SelectGroup>
-                      <SelectLabel>Other Tamil Fonts</SelectLabel>
-                      {otherFonts.map((font) => (
+                      <SelectLabel>Best English Fonts</SelectLabel>
+                      {bestEnglishFonts.map((font) => (
+                        <SelectItem key={font} value={font}>
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Stylish Fonts</SelectLabel>
+                      {stylishFonts.map((font) => (
                         <SelectItem key={font} value={font}>
                           {font}
                         </SelectItem>
