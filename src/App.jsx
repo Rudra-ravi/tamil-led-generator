@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Label } from '@/components/ui/label.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
-import { Download, Zap, ZoomIn, ZoomOut } from 'lucide-react'
+import { Download, Zap, ZoomIn, ZoomOut, Sparkles } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox.jsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select.jsx'
 import { HexColorPicker, HexColorInput } from 'react-colorful'
@@ -19,6 +19,7 @@ function App() {
   const [selectedColor, setSelectedColor] = useState('#FFFFFF')
   const [customFontSize, setCustomFontSize] = useState(0) // 0 means auto-size
   const [fontWeight, setFontWeight] = useState('bold') // Default to bold
+  const [pixelScaleFactor, setPixelScaleFactor] = useState(4) // Default to 4 for sharpness
   const [generatedImage, setGeneratedImage] = useState(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [previewZoom, setPreviewZoom] = useState(4) // Increased default zoom level
@@ -72,38 +73,50 @@ function App() {
   const generateLEDImage = () => {
     setIsGenerating(true)
     
-    const canvas = canvasRef.current
-    canvas.width = width
-    canvas.height = height
-    const ctx = canvas.getContext('2d')
+    // Create a temporary canvas for rendering at logical resolution
+    const tempCanvas = document.createElement('canvas')
+    tempCanvas.width = width
+    tempCanvas.height = height
+    const tempCtx = tempCanvas.getContext('2d')
     
-    ctx.fillStyle = '#000000'
-    ctx.fillRect(0, 0, width, height)
+    // Fill background (logical resolution)
+    tempCtx.fillStyle = '#000000'
+    tempCtx.fillRect(0, 0, width, height)
     
-    ctx.fillStyle = selectedColor
+    tempCtx.fillStyle = selectedColor
     
     let currentFontSize = customFontSize > 0 ? customFontSize : Math.floor(height * 0.8)
     let currentFontWeight = isBold ? 'bold' : fontWeight
     
-    ctx.font = `${currentFontWeight} ${currentFontSize}px ${selectedFont}, sans-serif`
+    tempCtx.font = `${currentFontWeight} ${currentFontSize}px ${selectedFont}, sans-serif`
     
-    let textMetrics = ctx.measureText(tamilText)
+    let textMetrics = tempCtx.measureText(tamilText)
     
     // Adjust font size only if customFontSize is not set and text overflows
     if (customFontSize === 0) {
       while (textMetrics.width > width - 2 && currentFontSize > 1) {
         currentFontSize--
-        ctx.font = `${currentFontWeight} ${currentFontSize}px ${selectedFont}, sans-serif`
-        textMetrics = ctx.measureText(tamilText)
+        tempCtx.font = `${currentFontWeight} ${currentFontSize}px ${selectedFont}, sans-serif`
+        textMetrics = tempCtx.measureText(tamilText)
       }
     }
 
     const x = (width - textMetrics.width) / 2
     const y = height / 2 + currentFontSize / 3
     
-    ctx.fillText(tamilText, x, y)
+    tempCtx.fillText(tamilText, x, y)
     
-    const imageDataUrl = canvas.toDataURL('image/png')
+    // Now, scale up to the physical canvas using pixelScaleFactor
+    const physicalCanvas = canvasRef.current
+    physicalCanvas.width = width * pixelScaleFactor
+    physicalCanvas.height = height * pixelScaleFactor
+    const physicalCtx = physicalCanvas.getContext('2d')
+
+    // Disable anti-aliasing for pixel-perfect scaling
+    physicalCtx.imageSmoothingEnabled = false;
+    physicalCtx.drawImage(tempCanvas, 0, 0, physicalCanvas.width, physicalCanvas.height);
+
+    const imageDataUrl = physicalCanvas.toDataURL('image/png')
     setGeneratedImage(imageDataUrl)
     setIsGenerating(false)
   }
@@ -111,7 +124,7 @@ function App() {
   const downloadImage = () => {
     if (generatedImage) {
       const link = document.createElement('a')
-      link.download = `tamil-led-${width}x${height}.png`
+      link.download = `tamil-led-${width}x${height}-scaled-${pixelScaleFactor}x.png`
       link.href = generatedImage
       link.click()
     }
@@ -246,6 +259,19 @@ function App() {
               </div>
 
               <div>
+                <Label htmlFor="pixel-scale-factor">Sharpness (Pixels per Logical Dot)</Label>
+                <Input
+                  id="pixel-scale-factor"
+                  type="number"
+                  value={pixelScaleFactor}
+                  onChange={(e) => setPixelScaleFactor(parseInt(e.target.value) || 1)}
+                  min="1"
+                  max="10"
+                  placeholder="e.g., 4 for 4x sharpness"
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="color-picker">Text Color</Label>
                 <div className="flex items-center space-x-2">
                   <HexColorInput 
@@ -295,7 +321,8 @@ function App() {
                       }}
                     />
                     <div className="text-sm text-gray-600">
-                      Dimensions: {width} × {height} pixels
+                      Logical Dimensions: {width} × {height} pixels<br/>
+                      Physical Output: {width * pixelScaleFactor} × {height * pixelScaleFactor} pixels
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <Button onClick={downloadImage} className="flex items-center gap-2">
@@ -340,6 +367,7 @@ function App() {
               <li>Enter your Tamil text in the input field</li>
               <li>Set your LED board dimensions (width × height in pixels)</li>
               <li>Choose font, font weight, font size (0 for auto-fit), bold, and color options</li>
+              <li>Adjust the 'Sharpness' (Pixels per Logical Dot) to scale the output for better visibility. Default is 4x.</li>
               <li>Click "Generate LED Image" to create the display</li>
               <li>Adjust the zoom slider to view the pixelated image clearly</li>
               <li>Download the PNG file and upload it to your LED controller</li>
