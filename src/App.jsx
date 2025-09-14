@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Label } from '@/components/ui/label.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
-import { Download, Zap } from 'lucide-react'
+import { Download, Zap, ZoomIn, ZoomOut } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox.jsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx'
 import { HexColorPicker, HexColorInput } from 'react-colorful'
+import { Slider } from '@/components/ui/slider.jsx'
 import './App.css'
 
 function App() {
@@ -15,9 +16,12 @@ function App() {
   const [height, setHeight] = useState(16)
   const [isBold, setIsBold] = useState(false)
   const [selectedFont, setSelectedFont] = useState('Noto Sans Tamil UI')
-  const [selectedColor, setSelectedColor] = useState('#FFFFFF') // Default to white
+  const [selectedColor, setSelectedColor] = useState('#FFFFFF')
+  const [customFontSize, setCustomFontSize] = useState(0) // 0 means auto-size
+  const [fontWeight, setFontWeight] = useState('normal') // normal, bold, 100-900
   const [generatedImage, setGeneratedImage] = useState(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [previewZoom, setPreviewZoom] = useState(2) // Default zoom level
   const canvasRef = useRef(null)
 
   const fonts = [
@@ -34,6 +38,10 @@ function App() {
     'AnjaliOldLipi'
   ]
 
+  const fontWeights = [
+    'normal', 'bold', 'lighter', 'bolder', '100', '200', '300', '400', '500', '600', '700', '800', '900'
+  ]
+
   const generateLEDImage = () => {
     setIsGenerating(true)
     
@@ -45,21 +53,26 @@ function App() {
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, width, height)
     
-    ctx.fillStyle = selectedColor // Use selected color
+    ctx.fillStyle = selectedColor
     
-    let fontSize = Math.floor(height * 0.8)
-    let fontStyle = isBold ? 'bold ' : ''
-    ctx.font = `${fontStyle}${fontSize}px ${selectedFont}, sans-serif`
+    let currentFontSize = customFontSize > 0 ? customFontSize : Math.floor(height * 0.8)
+    let currentFontWeight = isBold ? 'bold' : fontWeight
+    
+    ctx.font = `${currentFontWeight} ${currentFontSize}px ${selectedFont}, sans-serif`
     
     let textMetrics = ctx.measureText(tamilText)
-    while (textMetrics.width > width - 2 && fontSize > 1) {
-      fontSize--
-      ctx.font = `${fontStyle}${fontSize}px ${selectedFont}, sans-serif`
-      textMetrics = ctx.measureText(tamilText)
-    }
     
+    // Adjust font size only if customFontSize is not set and text overflows
+    if (customFontSize === 0) {
+      while (textMetrics.width > width - 2 && currentFontSize > 1) {
+        currentFontSize--
+        ctx.font = `${currentFontWeight} ${currentFontSize}px ${selectedFont}, sans-serif`
+        textMetrics = ctx.measureText(tamilText)
+      }
+    }
+
     const x = (width - textMetrics.width) / 2
-    const y = height / 2 + fontSize / 3
+    const y = height / 2 + currentFontSize / 3
     
     ctx.fillText(tamilText, x, y)
     
@@ -138,7 +151,7 @@ function App() {
                   checked={isBold}
                   onCheckedChange={setIsBold}
                 />
-                <Label htmlFor="bold-text">Bold Text</Label>
+                <Label htmlFor="bold-text">Bold Text (overrides Font Weight)</Label>
               </div>
 
               <div>
@@ -155,6 +168,35 @@ function App() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="font-weight-select">Font Weight</Label>
+                <Select value={fontWeight} onValueChange={setFontWeight} disabled={isBold}>
+                  <SelectTrigger className="w-full" id="font-weight-select">
+                    <SelectValue placeholder="Select font weight" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fontWeights.map((weight) => (
+                      <SelectItem key={weight} value={weight}>
+                        {weight}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="custom-font-size">Font Size (pixels, 0 for auto-fit)</Label>
+                <Input
+                  id="custom-font-size"
+                  type="number"
+                  value={customFontSize}
+                  onChange={(e) => setCustomFontSize(parseInt(e.target.value) || 0)}
+                  min="0"
+                  max="1000"
+                  placeholder="0 for auto-fit"
+                />
               </div>
 
               <div>
@@ -191,7 +233,7 @@ function App() {
               <CardDescription>Your LED board image will appear here</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 min-h-[200px] flex items-center justify-center">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 min-h-[200px] flex items-center justify-center relative overflow-hidden">
                 {generatedImage ? (
                   <div className="text-center space-y-4">
                     <img 
@@ -200,17 +242,33 @@ function App() {
                       className="mx-auto border border-gray-300 rounded"
                       style={{ 
                         imageRendering: 'pixelated',
-                        maxWidth: '100%',
-                        maxHeight: '200px'
+                        width: `${width * previewZoom}px`,
+                        height: `${height * previewZoom}px`,
+                        maxWidth: 'none',
+                        maxHeight: 'none'
                       }}
                     />
                     <div className="text-sm text-gray-600">
                       Dimensions: {width} × {height} pixels
                     </div>
-                    <Button onClick={downloadImage} className="flex items-center gap-2">
-                      <Download size={16} />
-                      Download PNG
-                    </Button>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button onClick={downloadImage} className="flex items-center gap-2">
+                        <Download size={16} />
+                        Download PNG
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        <ZoomOut size={16} className="text-gray-500" />
+                        <Slider
+                          min={1}
+                          max={10}
+                          step={0.5}
+                          value={[previewZoom]}
+                          onValueChange={(val) => setPreviewZoom(val[0])}
+                          className="w-[100px]"
+                        />
+                        <ZoomIn size={16} className="text-gray-500" />
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center text-gray-500">
@@ -235,8 +293,9 @@ function App() {
             <ol className="list-decimal list-inside space-y-2 text-gray-700">
               <li>Enter your Tamil text in the input field</li>
               <li>Set your LED board dimensions (width × height in pixels)</li>
-              <li>Choose font, bold, and color options</li>
+              <li>Choose font, font weight, font size (0 for auto-fit), bold, and color options</li>
               <li>Click "Generate LED Image" to create the display</li>
+              <li>Adjust the zoom slider to view the pixelated image clearly</li>
               <li>Download the PNG file and upload it to your LED controller</li>
             </ol>
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
