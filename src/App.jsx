@@ -25,32 +25,44 @@ function App() {
   const canvasRef = useRef(null)
 
   const tamilFonts = [
-    'Meera Inimai',
-    'Noto Sans Tamil',
-    'Tiro Tamil',
-    'Anek Tamil',
+    'Meera Inimai', // Recommended for screen readability
+    'Noto Sans Tamil', // Good for digital displays
+    'Tiro Tamil', // Classic readability
+    'Anek Tamil', // Modern, multiple weights
     'Tamil Sangam MN',
     'Brahma',
     'Ezhil',
     'Kavivanar',
     'Solaimalai',
-    'Sundar'
+    'Sundar',
+    'Latha',
+    'Shruti',
+    'Mukta Malar',
+    'Hind Madurai'
   ]
 
   const bestEnglishFonts = [
-    'Arial',
-    'Verdana',
+    'Oswald', // Good for LED displays, modern, readable
+    'Impact', // Very thick, good for headlines
+    'Arial Black', // Very thick, highly readable
+    'Roboto Black', // Thick variant of Roboto
+    'Montserrat Bold', // Strong, modern bold font
+    'Arial', // Classic, highly readable
+    'Verdana', // Designed for screen readability
     'Helvetica',
     'Roboto',
     'Open Sans'
   ]
 
   const stylishFonts = [
-    'Impact',
-    'Georgia',
-    'Courier New',
-    'Brush Script MT',
-    'Lucida Handwriting'
+    'Georgia', // Serif, but can be stylish
+    'Courier New', // Monospace, distinct
+    'Brush Script MT', // Script, decorative
+    'Lucida Handwriting', // Script, decorative
+    'Bodoni', // High contrast serif, stylish
+    'Playfair Display', // Elegant serif
+    'Times New Roman', // Classic serif
+    'Garamond' // Classic serif
   ]
 
   const fontWeights = [
