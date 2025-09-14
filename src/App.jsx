@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Download, Zap } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox.jsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx'
+import { HexColorPicker, HexColorInput } from 'react-colorful'
 import './App.css'
 
 function App() {
@@ -14,18 +15,23 @@ function App() {
   const [height, setHeight] = useState(16)
   const [isBold, setIsBold] = useState(false)
   const [selectedFont, setSelectedFont] = useState('Noto Sans Tamil UI')
+  const [selectedColor, setSelectedColor] = useState('#FFFFFF') // Default to white
   const [generatedImage, setGeneratedImage] = useState(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const canvasRef = useRef(null)
 
   const fonts = [
     'Noto Sans Tamil UI',
+    'Brahma',
     'Tamil MN',
     'Tamil Sangam MN',
     'Latha',
     'Shruti',
     'Mukta Malar',
-    'Hind Madurai'
+    'Hind Madurai',
+    'Aabohi',
+    'Aduscript',
+    'AnjaliOldLipi'
   ]
 
   const generateLEDImage = () => {
@@ -39,7 +45,7 @@ function App() {
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, width, height)
     
-    ctx.fillStyle = '#FFFFFF'
+    ctx.fillStyle = selectedColor // Use selected color
     
     let fontSize = Math.floor(height * 0.8)
     let fontStyle = isBold ? 'bold ' : ''
@@ -151,6 +157,23 @@ function App() {
                 </Select>
               </div>
 
+              <div>
+                <Label htmlFor="color-picker">Text Color</Label>
+                <div className="flex items-center space-x-2">
+                  <HexColorInput 
+                    id="color-picker"
+                    color={selectedColor}
+                    onChange={setSelectedColor}
+                    className="w-24 border rounded-md p-2 text-center uppercase"
+                  />
+                  <div 
+                    className="w-8 h-8 rounded-full border"
+                    style={{ backgroundColor: selectedColor }}
+                  ></div>
+                </div>
+                <HexColorPicker color={selectedColor} onChange={setSelectedColor} className="mt-2" />
+              </div>
+
               <Button 
                 onClick={generateLEDImage} 
                 className="w-full"
@@ -212,7 +235,7 @@ function App() {
             <ol className="list-decimal list-inside space-y-2 text-gray-700">
               <li>Enter your Tamil text in the input field</li>
               <li>Set your LED board dimensions (width × height in pixels)</li>
-              <li>Choose font and bold options</li>
+              <li>Choose font, bold, and color options</li>
               <li>Click "Generate LED Image" to create the display</li>
               <li>Download the PNG file and upload it to your LED controller</li>
             </ol>
